@@ -10,7 +10,8 @@ screen = pygame.display.set_mode((400, 600))
 screen.fill((240, 255, 255))
 
 tent = pygame.Surface((300, 300), pygame.SRCALPHA)
-
+tent_color_up = pygame.Surface.subsurface(tent, (0, 100, 200, 120))
+tent_color_down = pygame.Surface.subsurface(tent, (0, 165, 200, 100))
 
 man = pygame.Surface((200, 200), pygame.SRCALPHA)
 coat = pygame.Surface.subsurface(man, (50, 40, 100, 100))
@@ -18,20 +19,28 @@ left_arm = pygame.Surface.subsurface(man, (20, 70, 60, 15))
 right_arm = pygame.Surface.subsurface(man, (120, 70, 60, 15))
 
 cat = pygame.Surface((200, 200), pygame.SRCALPHA)
-fish = pygame.Surface.subsurface(cat, (20,20))
+cat_left_arm = pygame.Surface.subsurface(cat, (60, 70, 40, 15))
+cat_right_arm = pygame.Surface.subsurface(cat, (60, 70, 40, 15))
+cat_left_leg = pygame.Surface.subsurface(cat, (150, 70, 40, 15))
+cat_right_leg = pygame.Surface.subsurface(cat, (160, 70, 40, 15))
+cat_tail = pygame.Surface.subsurface(cat, (60, 70, 30, 5))
+fish = pygame.Surface.subsurface(cat, (20, 20, 100, 100))
 
 
 rect(screen, (255, 255, 240), (0, 0, 400, 250))
 
-circle(screen, (230, 230, 250), (130, 300), 100, draw_top_right = True, draw_top_left = True)
-arc(screen, (25, 25, 112), (30, 190, 200, 250), 0, math.pi, 3)
-arc(screen, (25, 25, 112), (30, 255, 200, 100), math.pi, 2*math.pi, 3)
-arc(screen, (25, 25, 112), (40, 210, 180, 100), math.pi, 2*math.pi, 3)
-arc(screen, (25, 25, 112), (60, 180, 140, 90), math.pi, 2*math.pi, 3)
-arc(screen, (25, 25, 112), (85, 170, 90, 60), math.pi, 2*math.pi, 3)
-arc(screen, (25, 25, 112), (100, 200, 80, 290), 0, math.pi/2, 3)
-arc(screen, (25, 25, 112), (80, 200, 80, 300), math.pi/2, math.pi,  3)
-ellipse(screen, (25, 25, 112), (115, 195, 30, 10), 3)
+
+#circle(screen, (230, 230, 250), (130, 300), 100, draw_top_right = True, draw_top_left = True)
+ellipse(tent_color_up, (224, 255, 255), (0, 0, 200, 250))
+ellipse(tent_color_down, (191, 239, 255), (0, 0, 200, 100))
+arc(tent, (25, 25, 112), (0, 100, 200, 250), 0, math.pi, 3)
+arc(tent, (25, 25, 112), (0, 165, 200, 100), math.pi, 2*math.pi, 3)
+arc(tent, (25, 25, 112), (10, 120, 180, 100), math.pi, 2*math.pi, 3)
+arc(tent, (25, 25, 112), (30, 90, 140, 90), math.pi, 2*math.pi, 3)
+arc(tent, (25, 25, 112), (55, 80, 90, 60), math.pi, 2*math.pi, 3)
+arc(tent, (25, 25, 112), (70, 110, 80, 290), 0, math.pi/2, 3)
+arc(tent, (25, 25, 112), (50, 110, 80, 300), math.pi/2, math.pi,  3)
+ellipse(tent, (25, 25, 112), (85, 105, 30, 10), 3)
 
 
 
@@ -62,12 +71,23 @@ rect(man, (205, 170, 125), (65, 145, 20, 20), border_radius=10)
 line(man, (0, 0, 0), (30,40), (20, 160), 2)
 
 #кошка
-
-
+ellipse(cat, (255, 130, 71), (60, 70, 90, 30))
+ellipse(cat, (255, 130, 71), (45, 51, 35, 30))
+"""ellipse(cat_left_arm, (0, 130, 71), (0, 0, 40, 15))
+cat_left_arm = pygame.transform.rotate(cat_left_arm, -60)
+cat.blit(cat_left_arm, (0, 0))
+ellipse(cat_right_arm, (255, 130, 71), (0, 0, 40, 15))
+ellipse(cat_left_leg, (255, 130, 71), (0, 0, 40, 15))
+ellipse(cat_right_leg, (255, 130, 71), (0, 0, 40, 15))
+ellipse(cat_tail, (255, 130, 71), (0, 0, 30, 5))
+"""
 
 pygame.Surface.unlock(man)
 pygame.Surface.unlock(coat)
-screen.blit(man, (200, 350))
+screen.blit(man, (200, 310))
+
+screen.blit(tent, (30, 70))
+screen.blit(cat, (30, 430))
 
 
 
