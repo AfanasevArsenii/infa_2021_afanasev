@@ -1,22 +1,24 @@
-import pygame
-from pygame.draw import *
-FPS = 30
-screen = pygame.display.set_mode((400, 400))
-right_arm = pygame.Surface((200, 200))
-ellipse(right_arm, (205, 170, 125), (0, 0, 60, 15), 0)
-right_arm = pygame.transform.rotate(right_arm, -30)
+import pygame as pg
+import sys
 
-screen.blit(right_arm, (0, 0))
+sc = pg.display.set_mode((300, 200))
+surf = pg.Surface((200, 150))
+surf.fill((255, 255, 255))
+surf.set_alpha(200)
 
-pygame.display.update()
+# сначала на главной поверхности
+# рисуется зеленый прямоуг
+pg.draw.rect(sc, (0, 255, 0),
+             (0, 80, 300, 40))
 
-clock = pygame.time.Clock()
-finished = False
+# поверх накладываем полупрозрачную
+# белую поверхность
+sc.blit(surf, (50, 25))
 
-while not finished:
-    clock.tick(FPS)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            finished = True
+pg.display.update()
 
-pygame.quit()
+while 1:
+    for i in pg.event.get():
+        if i.type == pg.QUIT:
+            sys.exit()
+    pg.time.delay(100)
