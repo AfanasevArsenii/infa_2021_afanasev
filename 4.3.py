@@ -124,6 +124,10 @@ draw_tent(tent, 100, 100, 1, 255, (224, 255, 255))
 draw_man(man, left_arm, right_arm, 300, 300, 1, 255, (205, 170, 125), (255, 211, 155), (255, 255, 224), (205, 170, 125))
 draw_cat(cat, cat_left_arm, cat_right_arm, cat_left_leg, cat_right_leg, cat_tail, fish,  200, 400, (255, 130, 71), 1, 255, False)
 
+draw_tent(tent, 600, -50, 2, 255, (224, 255, 255))
+draw_man(man, left_arm, right_arm, 800, 250, 2, 255, (205, 170, 125), (255, 211, 155), (255, 255, 224), (205, 170, 125))
+draw_cat(cat, cat_left_arm, cat_right_arm, cat_left_leg, cat_right_leg, cat_tail, fish,  600, 500, (255, 130, 71), 1, 255, False)
+
 pygame.display.update()
 
 clock = pygame.time.Clock()

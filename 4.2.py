@@ -83,6 +83,7 @@ polygon(cat, (255, 130, 71), [(50, 60), (60, 50), (45, 45)]) #левое ухо
 polygon(cat, (255, 130, 71), [(80, 65), (80, 45), (65, 50)]) #левое ухо
 ellipse(cat, (0, 0, 0), (58, 67, 5, 5))
 
+
 ellipse(cat_left_arm, (255, 130, 71), (0, 0, 60, 15))
 cat_left_arm = pygame.transform.rotate(cat_left_arm, 30)
 cat.blit(cat_left_arm, (15, 80))
@@ -103,8 +104,12 @@ ellipse(cat_tail, (255, 130, 71), (0, 0, 80, 20))
 cat_tail = pygame.transform.rotate(cat_tail, 230)
 cat.blit(cat_tail, (130, 25))
 
-ellipse(fish, (102, 205, 170), (0, 0, 40, 10))
-polygon(fish, (178, 34, 34), [(40, 5), (50, 10), (35, 15)])
+polygon(fish, (178, 34, 34), [(40, 10), (60, 0), (50, 20)])
+polygon(fish, (178, 34, 34), [(10, 13), (40, 23), (30, 13)])
+ellipse(fish, (102, 205, 170), (0, 5, 40, 10))
+circle(fish, (0, 0, 0), (10,10), 1, 0)
+polygon(fish, (255, 255, 255), [(30, 2), (27, 2), (28, 6)])
+polygon(fish, (255, 255, 255), [(23, 2), (20, 2), (22, 6)])
 fish = pygame.transform.rotate(fish, -20)
 cat.blit(fish, (0, 65))
 
