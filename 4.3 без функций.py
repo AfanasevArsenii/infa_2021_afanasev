@@ -120,6 +120,15 @@ screen.blit(man, (200, 310))
 screen.blit(tent, (30, 70))
 screen.blit(cat, (20, 430))
 
+screen.blit(pygame.transform.scale(pygame.transform.flip(man, True, False), (70, 70)), (280, 200))
+screen.blit(pygame.transform.scale(tent, (150, 150)), (50, 250))
+screen.blit(pygame.transform.scale(pygame.transform.flip(cat, True, False), (70, 70)), (150, 370))
+screen.blit(pygame.transform.scale(cat, (60, 60)), (320, 250))
+screen.blit(pygame.transform.scale(man, (100, 100)), (150, 270))
+screen.blit(pygame.transform.scale(tent, (100, 100)), (230, 220))
+screen.blit(pygame.transform.scale(pygame.transform.flip(man, True, False), (120, 120)), (10, 350))
+screen.blit(pygame.transform.scale(pygame.transform.flip(cat, True, False), (100, 100)), (270, 500))
+
 pygame.display.update()
 
 clock = pygame.time.Clock()
