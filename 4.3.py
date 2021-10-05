@@ -78,7 +78,7 @@ def draw_man(man, left_arm, right_arm, x, y, k, p, color_coat, color_fluff, colo
     screen.blit(man, (x, y))
 
 
-def draw_cat(cat, cat_left_arm, cat_right_arm, cat_left_leg, cat_right_leg, cat_tail, fish,  x, y, color_cat, k, p, yflip):
+def draw_cat(cat, cat_left_arm, cat_right_arm, cat_left_leg, cat_right_leg, cat_tail, fish,  x, y, color_cat, k, p, xflip):
     # кошка
     ellipse(cat, color_cat, (60, 70, 90, 30))  # тело
     ellipse(cat, color_cat, (45, 51, 35, 30))  # голова
@@ -115,7 +115,7 @@ def draw_cat(cat, cat_left_arm, cat_right_arm, cat_left_leg, cat_right_leg, cat_
     cat.blit(fish, (0, 65))
 
     cat = pygame.transform.scale(man, (200*k, 200*k))
-    cat = pygame.transform.flip(cat, False, yflip)
+    cat = pygame.transform.flip(cat, xflip, False)
     cat.set_alpha(p)
     screen.blit(cat, (x, y))
 
