@@ -21,8 +21,8 @@ COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 def new_ball():
     """Функция рисует новый шарик."""
     global x, y, r
-    x = randint(100, 1100)
-    y = randint(100, 900)
+    x = randint(100, 700)
+    y = randint(100, 700)
     r = randint(10, 100)
     color = COLORS[randint(0, 5)]
     circle(screen, color, (x, y), r)
@@ -36,9 +36,6 @@ def draw_score(score):
     f = pygame.font.SysFont('arial', 36)
     text = f.render('Score: ' + str(score), True, (255, 255, 255))
     screen.blit(text, (250, 50))
-
-
-def move_ball:
 
 
 pygame.display.update()
@@ -58,7 +55,6 @@ while not finished:
                 print('Miss again!')
 
     new_ball()
-    move_ball()
     draw_score(score)
     pygame.display.update()
     screen.fill(BLACK)
