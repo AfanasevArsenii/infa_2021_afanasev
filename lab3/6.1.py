@@ -38,6 +38,9 @@ def draw_score(score):
     screen.blit(text, (250, 50))
 
 
+def move_ball:
+
+
 pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
@@ -55,6 +58,7 @@ while not finished:
                 print('Miss again!')
 
     new_ball()
+    move_ball()
     draw_score(score)
     pygame.display.update()
     screen.fill(BLACK)
