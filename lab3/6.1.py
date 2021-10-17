@@ -3,7 +3,7 @@ from pygame.draw import *
 from random import randint
 pygame.init()
 
-FPS = 30
+FPS = 50
 screen = pygame.display.set_mode((900, 600))
 score = 0  # переменная для подсчёта очков
 balls_quantity = 5
@@ -38,10 +38,14 @@ def move_ball():
     for i in range(balls_quantity):
         balls[i][0] = balls[i][0] + balls[i][4]
         balls[i][1] += balls[i][5]
-        if balls[i][0] - balls[i][2] < 0 or balls[i][0] + balls[i][2] > 900:
-            balls[i][4] = - balls[i][4]
-        if balls[i][1] - balls[i][2] < 0 or balls[i][1] + balls[i][2] > 600:
-            balls[i][5] = - balls[i][5]
+        if balls[i][0] - balls[i][2] < 0:
+            balls[i][4] = randint(1, 10)
+        if balls[i][0] + balls[i][2] > 900:
+            balls[i][4] = randint(-10, -1)
+        if balls[i][1] - balls[i][2] < 0:
+            balls[i][5] = randint(1, 10)
+        if balls[i][1] + balls[i][2] > 600:
+            balls[i][5] = randint(-10, 1)
         circle(screen, balls[i][3], (balls[i][0], balls[i][1]), balls[i][2])
 
 
@@ -68,7 +72,6 @@ def click(cur_event):
             hasClicked = True
     if not hasClicked:
         score -= 1
-        print('Miss again!')
 
 
 new_balls()
