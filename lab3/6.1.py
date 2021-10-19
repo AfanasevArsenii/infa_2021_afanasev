@@ -22,7 +22,10 @@ COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 
 def new_balls(balls_quantity):
-    """Функция рисует новый шарик."""
+    """
+    Функция создаёт характеристики новых шариков.
+    :param balls_quantity: количество шариков.
+    """
     for i in range(balls_quantity):
         x = randint(100, 800)
         y = randint(100, 500)
@@ -34,6 +37,10 @@ def new_balls(balls_quantity):
 
 
 def new_squares(squares_quantity):
+    """
+    Функция создаёт характеристики новых шариков.
+    :params quares_quantity: количество прямоугольников.
+    """
     for i in range(squares_quantity):
         x = randint(100, 800)
         y = randint(100, 500)
@@ -46,7 +53,7 @@ def new_squares(squares_quantity):
 
 
 def move_ball():
-    """Функция двигает шарик"""
+    """Функция двигает шарики."""
     for i in range(balls_quantity):
         balls[i][0] = balls[i][0] + balls[i][4]
         balls[i][1] += balls[i][5]
@@ -60,8 +67,9 @@ def move_ball():
             balls[i][5] = randint(-10, -1)
         circle(screen, balls[i][3], (balls[i][0], balls[i][1]), balls[i][2])
 
+
 def move_square():
-    """Функция двигает шарик"""
+    """Функция двигает прямоугольники."""
     for i in range(squares_quantity):
         squares[i][0] = squares[i][0] + squares[i][5]
         squares[i][1] += squares[i][6]
@@ -76,26 +84,10 @@ def move_square():
         rect(screen, squares[i][4], (squares[i][0], squares[i][1], squares[i][2], squares[i][3]))
 
 
-def move_ball():
-    """Функция двигает шарик"""
-    for i in range(balls_quantity):
-        balls[i][0] = balls[i][0] + balls[i][4]
-        balls[i][1] += balls[i][5]
-        if balls[i][0] - balls[i][2] < 0:
-            balls[i][4] = randint(1, 10)
-        if balls[i][0] + balls[i][2] > 900:
-            balls[i][4] = randint(-10, -1)
-        if balls[i][1] - balls[i][2] < 0:
-            balls[i][5] = randint(1, 10)
-        if balls[i][1] + balls[i][2] > 600:
-            balls[i][5] = randint(-10, 1)
-        circle(screen, balls[i][3], (balls[i][0], balls[i][1]), balls[i][2])
-
-
 def draw_score(score):
     """
     Функция рисует панель счётчика с обновляющимся счётом:
-    :param score: счёт (количество пойманных шариков)
+    :param score: счёт (количество пойманных фигур)
     """
     f = pygame.font.SysFont('arial', 36)
     text = f.render('Score: ' + str(score), True, (255, 255, 255))
@@ -104,24 +96,26 @@ def draw_score(score):
 
 def click(cur_event):
     """
-    Функция реагирует на нажатие на шарик.
-    Если попал - прибавляется балл, если нет - балл отнимается.
+    Функция реагирует на нажатие на шарик или на прямоугольник.
+    Если попал в шарик - прибавляется балл, если попал в прямоугольник - 3 балла,
+    если нет - балл отнимается.
+    :param cur_event: событие (клик)
     """
-    hasClicked = False
+    clicked = False
     global score
     for i in range(balls_quantity):
         if (cur_event.pos[0]-balls[i][0])**2 + (cur_event.pos[1]-balls[i][1])**2 <= balls[i][2]**2:
             score += 1
             balls.pop(i)
             new_balls(1)
-            hasClicked = True
+            clicked = True
     for i in range(squares_quantity):
         if (cur_event.pos[0]-squares[i][0])**2 + (cur_event.pos[1]-squares[i][1])**2 <= squares[i][2]**2:
             score += 3
             squares.pop(i)
             new_squares(1)
-            hasClicked = True
-    if not hasClicked:
+            clicked = True
+    if not clicked:
         score -= 1
 
 
@@ -162,5 +156,5 @@ while not finished:
     pygame.display.update()
     screen.fill(BLACK)
 
-#results_table()
+#  results_table()
 pygame.quit()
