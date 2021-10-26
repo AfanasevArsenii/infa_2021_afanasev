@@ -52,7 +52,7 @@ class Balls:
         if self.y + self.r > 600:
             self.dy = randint(-10, -1)
         for j in range(len(my_balls)-1):
-            if (self.x-my_balls[j].x)**2+(self.y-my_balls[j].y)**2 <= (self.r + my_balls[j].r)**2:
+            if (self.x-my_balls[j].x)**2+(self.y-my_balls[j].y)**2 < (self.r + my_balls[j].r)**2:
                 self.dx, my_balls[j].dx = my_balls[j].dx, self.dx
                 self.dy, my_balls[j].dy = my_balls[j].dy, self.dy
 
@@ -75,8 +75,8 @@ class Rectangles:
     def __init__(self, screen):
         self.x = randint(100, 800)
         self.y = randint(100, 500)
-        self.width = randint(10, 100)
-        self.height = randint(10, 100)
+        self.width = randint(30, 100)
+        self.height = randint(30, 100)
         self.color = COLORS[randint(0, 5)]
         self.dx = randint(-10, 10)
         self.dy = randint(-10, 10)
@@ -89,15 +89,26 @@ class Rectangles:
         self.y += self.dy
         if self.x < 0:
             self.dx = randint(1, 10)
+            self.width -= 5
         if self.x + self.width > 900:
             self.dx = randint(-10, -1)
+            self.width -= 5
         if self.y < 0:
             self.dy = randint(1, 10)
+            self.height -= 5
         if self.y + self.height > 600:
             self.dy = randint(-10, -1)
+            self.height -= 5
     def draw(self):
         """Функция отрисовывает новое положение шарика"""
         rect(self.screen, self.color, (self.x, self.y, self.width, self.height))
+
+
+def check_len(my_rectangles):
+    for i in range(len(my_rectangles)):
+        if my_rectangles[i].width <=0 or my_rectangles[i].height <=0:
+            my_rectangles.pop(i)
+            my_rectangles.append(Rectangles(screen))
 
 
 def draw_score(score):
@@ -199,6 +210,7 @@ while not finished:
         my_rectangles[i].move()
         my_rectangles[i].draw()
     draw_score(score)
+    check_len(my_rectangles)
     pygame.display.update()
     screen.fill(BLACK)
 
