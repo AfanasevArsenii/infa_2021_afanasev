@@ -51,6 +51,10 @@ class Balls:
             self.dy = randint(1, 10)
         if self.y + self.r > 600:
             self.dy = randint(-10, -1)
+        for j in range(len(my_balls)-1):
+            if (self.x-my_balls[j].x)**2+(self.y-my_balls[j].y)**2 <= (self.r + my_balls[j].r)**2:
+                self.dx, my_balls[j].dx = my_balls[j].dx, self.dx
+                self.dy, my_balls[j].dy = my_balls[j].dy, self.dy
 
     def draw(self):
         """Функция отрисовывает новое положение шарика"""
@@ -91,7 +95,6 @@ class Rectangles:
             self.dy = randint(1, 10)
         if self.y + self.height > 600:
             self.dy = randint(-10, -1)
-
     def draw(self):
         """Функция отрисовывает новое положение шарика"""
         rect(self.screen, self.color, (self.x, self.y, self.width, self.height))
