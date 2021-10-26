@@ -1,10 +1,8 @@
 import pygame
 from pygame.draw import *
 from random import randint
-pygame.init()
 
-FPS = 50
-screen = pygame.display.set_mode((900, 600))
+
 score = 0  # переменная для подсчёта очков
 balls_quantity = 5
 squares_quantity = 5
@@ -110,7 +108,8 @@ def click(cur_event):
             new_balls(1)
             clicked = True
     for i in range(squares_quantity):
-        if (cur_event.pos[0]-squares[i][0])**2 + (cur_event.pos[1]-squares[i][1])**2 <= squares[i][2]**2:
+        if (cur_event.pos[0] <= squares[i][0] + squares[i][2]) and (cur_event.pos[0] >= squares[i][0]) \
+                and (cur_event.pos[1] <= squares[i][1] + squares[i][3]) and (cur_event.pos[1] >= squares[i][1]):
             score += 3
             squares.pop(i)
             new_squares(1)
@@ -119,21 +118,40 @@ def click(cur_event):
         score -= 1
 
 
-"""
-def results_table():
-    print("Введите своё имя: ")
-    output = open("results.txt", 'r')
-    records = output.readlines()
-    output = open("results.txt", 'a')
-    records.append(input() + ": " + str(score) + '\n')
-    output.write(input() + " " + str(score) + '\n')
-    for i in (len(records)):
-        records[i] = records[i].split(': ')
-    
+def custom_key(k):
+    return k[1]
 
-    records.sort()
-    output.close()
-    """
+
+def results_table():
+    results = []
+    with open("results.txt", 'r') as output:
+        records = output.readlines()
+
+    if len(records) == 0:
+        with open("results.txt", 'w') as output:
+            output.write(name + ": " + str(score) + '\n')
+    else:
+        names = list(map(lambda x: x.split(': ')[0], records))
+        scores = list(map(lambda x: x.split(': ')[1], records))
+        scores = list(map(lambda x: x.split('\n')[0], scores))
+        for i in range(len(records)):
+            results.append([names[i], int(scores[i])])
+        results.append([name, score])
+        results.sort(key=custom_key, reverse=True)
+        output = open("results.txt", 'w')
+        for i in range(len(results)):
+            output.write(results[i][0] + ": " + str(results[i][1]) + '\n')
+        output.close()
+
+
+print("Введите своё имя: ")
+name = input()
+
+
+pygame.init()
+
+FPS = 50
+screen = pygame.display.set_mode((900, 600))
 
 
 new_balls(balls_quantity)
@@ -156,5 +174,5 @@ while not finished:
     pygame.display.update()
     screen.fill(BLACK)
 
-#  results_table()
+results_table()
 pygame.quit()
