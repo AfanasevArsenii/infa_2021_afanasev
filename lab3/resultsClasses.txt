@@ -1,0 +1,3 @@
+Ars: 6
+sadg: 3
+asfg: -6
