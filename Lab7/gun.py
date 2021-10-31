@@ -50,14 +50,7 @@ class Ball:
         self.vy -= self.ay
         self.x += self.vx
         self.y -= self.vy
-        """if (self.x - self.r < 0 and self.vx < 0) or (self.x + self.r > 800 and self.vx > 0):
-            self.vx = - self.vx
-        if ((self.y - self.r < 0) and (self.vy > 0)) or ((self.y + self.r > 600) and (self.vy < 0)):
-            self.vy = -self.vy
-            if abs(self.vy) < 1:
-                self.vx = 0
-                self.vy = 0
-                self.ay = 0"""
+
         if self.x - self.r < 0:
             self.vx = - self.vx
             self.x = self.r
