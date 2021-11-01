@@ -164,11 +164,6 @@ class Target:
         self.vy = randint(-10, 10)
         self.color = RED
 
-    def hit(self, points=1):
-        """Попадание шарика в цель."""
-        self.points += points
-        return self.points
-
     def move(self):
         """Функция двигает прямоуголник (меняет координаты)
         Если прямоугольник ударился о стенку меняет скорость прямоугольника"""
@@ -199,17 +194,21 @@ class Target:
 
 
 class Game:
-    def __init__(self, targets_quantity=5):
+    def __init__(self, targets_quantity=5, points=0):
         self.screen = screen
         self.bullets = []
         self.targets = []
         self.targets_quantity = targets_quantity
-        #self.bullet = 0
         self.gun = Gun()
+        self.points = points
 
-    #def draw_points(self):
-        #text = FONT.render('Score: ' + str(self.target.hit()), True, BLACK)
-        #screen.blit(text, (250, 50))
+    """def hit(self):
+        self.points += 1"""
+
+    def draw_points(self):
+        text = FONT.render('Score: ' + str(self.points), True, BLACK)
+        self.screen.blit(text, (WIDTH/3, 20))
+        print(self.points)
 
 
     def mainloop(self):
@@ -230,7 +229,6 @@ class Game:
                 self.targets[t].move()
                 self.targets[t].draw()
 
-            pygame.display.update()
             clock.tick(FPS)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -245,13 +243,14 @@ class Game:
                 b.move()
                 for t in range(len(self.targets)):
                     if b.hittest(self.targets[t]):
-                        self.targets[t].hit()
+                        self.points += 1
                         self.targets[t] = Target()
                         self.bullets.remove(b)
                 if b.life() > 150:
                     self.bullets.remove(b)
             self.gun.power_up()
-            #self.draw_points()
+            self.draw_points()
+            pygame.display.update()
         pygame.quit()
 
 
@@ -261,9 +260,10 @@ def main():
     pygame.init()
     pygame.font.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    FONT = pygame.font.SysFont('None', 36)
+    FONT = pygame.font.SysFont('century gothic', 36)
     game = Game()
     game.mainloop()
+
 
 
 if __name__ == '__main__':
