@@ -20,9 +20,11 @@ GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 WIDTH = 800
 HEIGHT = 600
 
+global screen
+
 
 class Ball:
-    def __init__(self, screen: pygame.Surface, x=40, y=450):
+    def __init__(self, x=40, y=450):
         """ Конструктор класса ball
 
         Args:
@@ -46,7 +48,7 @@ class Ball:
         self.x и self.y с учетом скоростей self.vx и self.vy, силы гравитации, действующей на мяч,
         и стен по краям окна (размер окна 800х600).
         """
-        # FIXME
+        # FIXME %%%
         self.vy -= self.ay
         self.x += self.vx
         self.y -= self.vy
@@ -54,21 +56,21 @@ class Ball:
         if self.x - self.r < 0:
             self.vx = - self.vx
             self.x = self.r
-        if self.x + self.r > 800:
+        if self.x + self.r > WIDTH:
             self.vx = - self.vx
             self.x = 800 - self.r
         if self.y - self.r < 0:
             self.vy = -self.vy
             self.y = self.r
-        if self.y + self.r >= 600:
+        if self.y + self.r >= HEIGHT:
             self.vy = -0.9*self.vy
             self.y = 600 - self.r
-            print(self.vx, self.vy)
+            #print(self.vx, self.vy)
             if abs(self.vy) < 5:
                 self.vx = 0
                 self.vy = 0
                 self.ay = 0
-                print(self.vx, self.vy, self.ay)
+                #print(self.vx, self.vy, self.ay)
 
     def draw(self):
         pygame.draw.circle(
@@ -93,12 +95,16 @@ class Ball:
 
 
 class Gun:
-    def __init__(self, screen):
+    def __init__(self, x=40, y=450):
         self.screen = screen
         self.f2_power = 10
         self.f2_on = 0
         self.an = 1
         self.color = GREY
+        self.y = y
+        self.x = x
+        self.length = 30
+        self.width = 10
 
     def fire2_start(self, event):
         self.f2_on = 1
@@ -109,8 +115,8 @@ class Gun:
         Происходит при отпускании кнопки мыши.
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
         """
-        new_ball = Ball(self.screen)
-        new_ball.r += 5
+        new_ball = Ball()
+        #new_ball.r += 5
         self.an = math.atan2((event.pos[1]-new_ball.y), (event.pos[0]-new_ball.x))
         new_ball.vx = self.f2_power * math.cos(self.an)
         new_ball.vy = - self.f2_power * math.sin(self.an)
@@ -118,33 +124,41 @@ class Gun:
         self.f2_power = 10
         return new_ball
 
-
     def targetting(self, event):
         """Прицеливание. Зависит от положения мыши."""
-        if event:
-            self.an = math.atan((event.pos[1]-450) / (event.pos[0]-20))
-        if self.f2_on:
-            self.color = RED
+        #if event:
+            #self.an = math.atan2((event.pos[1]-self.y), (event.pos[0]-self.x))
+        """if self.f2_on:
+            self.color = YELLOW
         else:
-            self.color = GREY
+            self.color = GREY"""
 
     def draw(self):
-        # FIXIT don't know how to do it
-        pass
-
-
+        (x_mouse, y_mouse) = pygame.mouse.get_pos()
+        self.an = math.atan2((-y_mouse + self.y), (x_mouse - self.x))
+        #print(self.an)
+        length_up = self.length + self.f2_power
+        width_half = self.width / 2
+        pygame.draw.polygon(self.screen, self.color, ((self.x - width_half * math.sin(self.an),
+                                                       self.y - width_half * math.cos(self.an)),
+                                                      (self.x + width_half * math.sin(self.an),
+                                                       self.y + width_half * math.cos(self.an)),
+                                                      (self.x + width_half * math.sin(self.an) + length_up * math.cos(self.an),
+                                                       self.y + width_half * math.cos(self.an) - length_up * math.sin(self.an)),
+                                                      (self.x - width_half * math.sin(self.an) + length_up * math.cos(self.an),
+                                                       self.y - width_half * math.cos(self.an) - length_up * math.sin(self.an))))
     def power_up(self):
         if self.f2_on:
             if self.f2_power < 100:
                 self.f2_power += 1
-            self.color = RED
+            self.color = YELLOW
         else:
             self.color = GREY
 
 
 class Target:
-    def __init__(self, screen):
-        '''Инициализация новой цели.'''
+    def __init__(self):
+        """Инициализация новой цели."""
         self.screen = screen
         self.points = 0
         self.live = 1
@@ -168,16 +182,17 @@ class Target:
 
 
 class Game:
-    def __init__(self, screen):
+    def __init__(self):
         self.screen = screen
         self.balls = []
         self.bullet = 0
-        self.gun = Gun(screen)
-        self.target = Target(screen)
+        self.gun = Gun()
+        self.target = Target()
 
     def mainloop(self):
         clock = pygame.time.Clock()
         finished = False
+
 
         while not finished:
             self.screen.fill(WHITE)
@@ -212,9 +227,10 @@ class Game:
 
 
 def main():
+    global screen
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    game = Game(screen)
+    game = Game()
     game.mainloop()
 if __name__ == '__main__':
     main()
