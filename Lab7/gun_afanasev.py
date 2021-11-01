@@ -183,7 +183,6 @@ class Target:
             self.vy = randint(-10, -1)
             self.y = HEIGHT - self.r
 
-
     def draw(self):
         pygame.draw.circle(
             self.screen,
@@ -210,6 +209,31 @@ class Game:
         self.screen.blit(text, (WIDTH/3, 20))
         print(self.points)
 
+    def custom_key(self, k):
+        return k[1]
+
+    def results_table(self):
+        print('Enter your name: ')
+        name = input()
+        results = []
+        with open("GunResults.txt", 'r') as output:
+            records = output.readlines()
+
+        if len(records) == 0:
+            with open("GunResults.txt", 'w') as output:
+                output.write(name + ": " + str(self.points) + '\n')
+        else:
+            names = list(map(lambda x: x.split(': ')[0], records))
+            scores = list(map(lambda x: x.split(': ')[1], records))
+            scores = list(map(lambda x: x.split('\n')[0], scores))
+            for i in range(len(records)):
+                results.append([names[i], int(scores[i])])
+            results.append([name, self.points])
+            results.sort(key=self.custom_key, reverse=True)
+            output = open("GunResults.txt", 'w')
+            for i in range(len(results)):
+                output.write(str(results[i][0]) + ": " + str(results[i][1]) + '\n')
+            output.close()
 
     def mainloop(self):
         for t in range(self.targets_quantity):
@@ -252,6 +276,7 @@ class Game:
             self.draw_points()
             pygame.display.update()
         pygame.quit()
+        self.results_table()
 
 
 def main():
@@ -263,7 +288,6 @@ def main():
     FONT = pygame.font.SysFont('century gothic', 36)
     game = Game()
     game.mainloop()
-
 
 
 if __name__ == '__main__':
