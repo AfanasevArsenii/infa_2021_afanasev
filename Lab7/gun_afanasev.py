@@ -46,7 +46,6 @@ class Bullet:
         self.lifetime += 1
         return self.lifetime
 
-
     def move(self):
         """Переместить мяч по прошествии единицы времени.
 
@@ -111,7 +110,7 @@ class Gun:
         self.length = 30
         self.width = 10
 
-    def fire2_start(self, event):
+    def fire2_start(self):
         self.f2_on = 1
 
     def fire2_end(self, event):
@@ -162,6 +161,7 @@ class Target:
         self.r = randint(20, 50)
         self.vx = randint(-10, 10)
         self.vy = randint(-10, 10)
+        self.m = (self.r)**2
         self.color = RED
 
     def move(self):
@@ -201,13 +201,15 @@ class Game:
         self.gun = Gun()
         self.points = points
 
-    """def hit(self):
-        self.points += 1"""
+    def collide_targets(self, target):
+        for j in range(len(self.targets)-1):
+            if (target.x-self.targets[j].x)**2+(target.y-self.targets[j].y)**2 < (target.r + self.targets[j].r)**2:
+                target.vx, self.targets[j].vx = self.targets[j].vx, target.vx
+                target.vy, self.targets[j].vy = self.targets[j].vy, target.vy
 
     def draw_points(self):
         text = FONT.render('Score: ' + str(self.points), True, BLACK)
         self.screen.blit(text, (WIDTH/3, 20))
-        print(self.points)
 
     def custom_key(self, k):
         return k[1]
@@ -251,6 +253,7 @@ class Game:
 
             for t in range(len(self.targets)):
                 self.targets[t].move()
+                self.collide_targets(self.targets[t])
                 self.targets[t].draw()
 
             clock.tick(FPS)
@@ -258,7 +261,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     finished = True
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    self.gun.fire2_start(event)
+                    self.gun.fire2_start()
                 elif event.type == pygame.MOUSEBUTTONUP:
                     new_bullet = self.gun.fire2_end(event)
                     self.bullets.append(new_bullet)
