@@ -40,7 +40,12 @@ class Bullet:
         self.color = choice(GAME_COLORS)
         self.live = 30
         self.ay = 10
-        self.live = 1
+        self.lifetime = 0
+
+    def life(self):
+        self.lifetime += 1
+        return self.lifetime
+
 
     def move(self):
         """Переместить мяч по прошествии единицы времени.
@@ -243,6 +248,8 @@ class Game:
                         self.targets[t].hit()
                         self.targets[t] = Target()
                         self.bullets.remove(b)
+                if b.life() > 150:
+                    self.bullets.remove(b)
             self.gun.power_up()
             #self.draw_points()
         pygame.quit()
