@@ -225,6 +225,34 @@ class Game:
         """Функция изменяет движение целей в зависимости от их столкновения друг с другом."""
         for j in range(len(self.targets)-1):
             if (target.x-self.targets[j].x)**2+(target.y-self.targets[j].y)**2 < (target.r + self.targets[j].r)**2:
+                if target.x > self.targets[j].x:
+                    x =target.x
+                    target.x += (self.targets[j].x +
+                                 ((target.r + self.targets[j].r) ** 2 - (target.y - self.targets[j].y) ** 2) ** 0.5
+                                 - target.x)/2
+                    self.targets[j].x -= (self.targets[j].x - (x -
+                                         ((target.r+self.targets[j].r)**2 - (target.y-self.targets[j].y)**2)**0.5))/2
+                if target.x < self.targets[j].x:
+                    x = target.x
+                    target.x -= (target.x - (self.targets[j].x -
+                                ((target.r+self.targets[j].r)**2 - (target.y-self.targets[j].y)**2) ** 0.5))/2
+                    self.targets[j].x += (x +
+                                          ((target.r+self.targets[j].r)**2 - (target.y-self.targets[j].y)**2) ** 0.5
+                                          - self.targets[j].x)/2
+                if target.y > self.targets[j].y:
+                    y = target.y
+                    target.y += (self.targets[j].y +
+                                 ((target.r + self.targets[j].r) ** 2 - (target.x - self.targets[j].x) ** 2) ** 0.5
+                                 - target.y)/2
+                    self.targets[j].y -= (self.targets[j].y - (y -
+                                         ((target.r+self.targets[j].r)**2 - (target.x-self.targets[j].x)**2)**0.5))/2
+                if target.y < self.targets[j].y:
+                    y = target.y
+                    target.y -= (target.y - (self.targets[j].y -
+                                ((target.r+self.targets[j].r)**2 - (target.x-self.targets[j].x)**2) ** 0.5))/2
+                    self.targets[j].x += (y +
+                                          ((target.r+self.targets[j].r)**2 - (target.x-self.targets[j].x)**2) ** 0.5
+                                          - self.targets[j].y)/2
                 target.vx, self.targets[j].vx = self.targets[j].vx, target.vx
                 target.vy, self.targets[j].vy = self.targets[j].vy, target.vy
 
