@@ -28,8 +28,8 @@ class Bullet:
         """ Конструктор класса Bullet
 
         Args:
-        x - начальное положение мяча по горизонтали
-        y - начальное положение мяча по вертикали
+        x - начальное положение пули по горизонтали
+        y - начальное положение пули по вертикали
         """
         self.screen = screen
         self.x = x
@@ -43,14 +43,15 @@ class Bullet:
         self.lifetime = 0
 
     def life(self):
+        """Функция подсчитывает, сколько времени живёт пуля."""
         self.lifetime += 1
         return self.lifetime
 
     def move(self):
-        """Переместить мяч по прошествии единицы времени.
+        """Функция перемещает пулю.
 
         Метод описывает перемещение мяча за один кадр перерисовки. То есть, обновляет значения
-        self.x и self.y с учетом скоростей self.vx и self.vy, силы гравитации, действующей на мяч,
+        self.x и self.y с учетом скоростей self.vx и self.vy, силы гравитации, действующей на пулю,
         и стен по краям окна (размер окна 800х600).
         """
         self.vy -= self.ay
@@ -70,13 +71,12 @@ class Bullet:
             self.vy = -0.9*self.vy
             self.vx = 0.9*self.vx
             self.y = HEIGHT - self.r
-            # print(self.vx, self.vy)
             if abs(self.vy) < 5:
                 self.vy = 0
                 self.ay = 0
-                # print(self.vx, self.vy, self.ay)
 
     def draw(self):
+        """Функиця отрисовывает положение пули на экране."""
         pygame.draw.circle(
             self.screen,
             self.color,
@@ -85,7 +85,7 @@ class Bullet:
         )
 
     def hittest(self, obj):
-        """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
+        """Функция проверяет сталкивалкивается ли пуля с целью, описываемой в обьекте obj.
 
         Args:
             obj: Обьект, с которым проверяется столкновение.
@@ -100,6 +100,12 @@ class Bullet:
 
 class Gun:
     def __init__(self, x=40, y=450):
+        """ Конструктор класса Gun
+
+        Args:
+        x - начальное положение левого верхнего угла пушки по горизонтали
+        y - начальное положение левого верхнего угла пушки по вертикали
+        """
         self.screen = screen
         self.f2_power = 10
         self.f2_on = 0
@@ -111,13 +117,15 @@ class Gun:
         self.width = 10
 
     def fire2_start(self):
+        """Функция активирует пушку."""
         self.f2_on = 1
 
     def fire2_end(self, event):
-        """Выстрел мячом.
+        """Выстрел из пушки пулей.
 
         Происходит при отпускании кнопки мыши.
-        Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
+        Начальные значения компонент скорости мяча vx и vy зависят от положения мыши
+        и времени нажатия на правую кнопку мыши.
         """
         new_bullet = Bullet()
         self.an = math.atan2((event.pos[1]-new_bullet.y), (event.pos[0]-new_bullet.x))
@@ -128,6 +136,7 @@ class Gun:
         return new_bullet
 
     def draw(self):
+        """Функция отрисовывает положение положение пушки на экране."""
         (x_mouse, y_mouse) = pygame.mouse.get_pos()
         self.an = math.atan2((-y_mouse + self.y), (x_mouse - self.x))
         length_up = self.length + self.f2_power
@@ -143,6 +152,7 @@ class Gun:
                             self.y - width_half * math.cos(self.an) - length_up * math.sin(self.an))))
 
     def power_up(self):
+        """Функция удлинняет пушку, увеличивает начальную скорость пули при длительном нажатии на правую кнопку мыши."""
         if self.f2_on:
             if self.f2_power < 100:
                 self.f2_power += 1
@@ -153,7 +163,7 @@ class Gun:
 
 class Target:
     def __init__(self):
-        """Инициализация новой цели."""
+        """ Конструктор класса Target"""
         self.screen = screen
         self.points = 0
         self.x = randint(600, 780)
@@ -161,12 +171,15 @@ class Target:
         self.r = randint(20, 50)
         self.vx = randint(-10, 10)
         self.vy = randint(-10, 10)
-        self.m = (self.r)**2
         self.color = RED
 
     def move(self):
-        """Функция двигает прямоуголник (меняет координаты)
-        Если прямоугольник ударился о стенку меняет скорость прямоугольника"""
+        """Функция перемещает цель.
+
+        Метод описывает перемещение цели за один кадр перерисовки. То есть, обновляет значения
+        self.x и self.y с учетом скоростей self.vx и self.vy,
+        отражения от стен по краям окна (размер окна 800х600).
+        """
         self.x += self.vx
         self.y += self.vy
 
@@ -184,6 +197,7 @@ class Target:
             self.y = HEIGHT - self.r
 
     def draw(self):
+        """Функция отрисовывает цель на экране."""
         pygame.draw.circle(
             self.screen,
             self.color,
@@ -194,6 +208,12 @@ class Target:
 
 class Game:
     def __init__(self, targets_quantity=5, points=0):
+        """ Конструктор класса Gun
+
+        Args:
+        targets_quantity - количество целей.
+        points - количество поражённых целей.
+        """
         self.screen = screen
         self.bullets = []
         self.targets = []
@@ -202,19 +222,23 @@ class Game:
         self.points = points
 
     def collide_targets(self, target):
+        """Функция изменяет движение целей в зависимости от их столкновения друг с другом."""
         for j in range(len(self.targets)-1):
             if (target.x-self.targets[j].x)**2+(target.y-self.targets[j].y)**2 < (target.r + self.targets[j].r)**2:
                 target.vx, self.targets[j].vx = self.targets[j].vx, target.vx
                 target.vy, self.targets[j].vy = self.targets[j].vy, target.vy
 
     def draw_points(self):
+        """Функция отрисовывает количество поражённых целей на экране."""
         text = FONT.render('Score: ' + str(self.points), True, BLACK)
         self.screen.blit(text, (WIDTH/3, 20))
 
     def custom_key(self, k):
+        """Вспомогательная функция. Возвращает параметр, по которому следует проводить сортировку."""
         return k[1]
 
     def results_table(self):
+        """Функция выводит результаты игры в файл GunResults в порядке убывания."""
         print('Enter your name: ')
         name = input()
         results = []
@@ -238,6 +262,7 @@ class Game:
             output.close()
 
     def mainloop(self):
+        """Функция описывает основной цикл игры."""
         for t in range(self.targets_quantity):
             self.targets.append(Target())
 
@@ -283,6 +308,7 @@ class Game:
 
 
 def main():
+    """Фунция запускает игру."""
     global screen
     global FONT
     pygame.init()
