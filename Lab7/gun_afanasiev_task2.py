@@ -31,8 +31,6 @@ class Projectile:
         y - начальное положение пули по вертикали
         """
         self.screen = screen
-        self.x = 40
-        self.y = 450
         self.r = 10
         self.vx = 0
         self.vy = 0
@@ -98,9 +96,11 @@ class Projectile:
 
 
 class Bullet(Projectile):
-    def __init__(self):
+    def __init__(self, gunX, gunY):
         """Конструктор класса Bullet (дочерний класс класса Projectile)"""
         super().__init__()
+        self.x = gunX
+        self.y = gunY
 
 
 class BulletFromBomb(Projectile):
@@ -118,9 +118,11 @@ class BulletFromBomb(Projectile):
 
 
 class Bomb(Projectile):
-    def __init__(self):
+    def __init__(self, gunX, gunY):
         """Конструктор класса Bomb (дочерний класс класса Projectile)"""
         super().__init__()
+        self.x = gunX
+        self.y = gunY
 
     def radius_up(self):
         """Метод увеличивает радиус бомбы."""
@@ -135,7 +137,7 @@ class Bomb(Projectile):
 
 
 class Gun:
-    def __init__(self, x=40, y=450):
+    def __init__(self, gunX, gunY):
         """ Конструктор класса Gun
 
         Args:
@@ -147,8 +149,8 @@ class Gun:
         self.f_on = 0
         self.an = 1
         self.color = GREY
-        self.y = y
-        self.x = x
+        self.y = gunY
+        self.x = gunX
         self.length = 30
         self.width = 10
 
@@ -163,7 +165,7 @@ class Gun:
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши
         и времени нажатия на правую кнопку мыши.
         """
-        new_bullet_bomb = Bomb()
+        new_bullet_bomb = Bomb(self.x, self.y)
         self.an = math.atan2((event.pos[1]-new_bullet_bomb.y), (event.pos[0]-new_bullet_bomb.x))
         new_bullet_bomb.vx = self.f_power * math.cos(self.an)
         new_bullet_bomb.vy = - self.f_power * math.sin(self.an)
@@ -178,7 +180,7 @@ class Gun:
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши
         и времени нажатия на правую кнопку мыши.
         """
-        new_bullet = Bullet()
+        new_bullet = Bullet(self.x, self.y)
         self.an = math.atan2((event.pos[1]-new_bullet.y), (event.pos[0]-new_bullet.x))
         new_bullet.vx = self.f_power * math.cos(self.an)
         new_bullet.vy = - self.f_power * math.sin(self.an)
@@ -197,6 +199,7 @@ class Gun:
         self.an = math.atan2((-y_mouse + self.y), (x_mouse - self.x))
         length_up = self.length + self.f_power
         width_half = self.width / 2
+        pygame.draw.rect(self.screen, BLACK, (self.x - 15, self.y - 15, 30, 30))
         pygame.draw.polygon(self.screen, self.color,
                           ((self.x - width_half * math.sin(self.an),
                             self.y - width_half * math.cos(self.an)),
@@ -307,7 +310,7 @@ class Game:
         self.rectangles = []
         self.balls_quantity = balls_quantity
         self.rectangles_quantity = rectangles_quantity
-        self.gun = Gun()
+        self.gun = Gun(randint(100, WIDTH-100), randint(100, HEIGHT-100))
 
     def collide_targets(self, target):
         """Метод изменяет движение целей в зависимости от их столкновения друг с другом."""
@@ -396,6 +399,8 @@ class Game:
         clock = pygame.time.Clock()
         finished = False
 
+        motion = "STOP"
+
         while not finished:
             self.screen.fill(WHITE)
             self.gun.draw()
@@ -421,6 +426,27 @@ class Game:
                 elif event.type == pygame.MOUSEBUTTONUP and points % 5 == 0 and points != 0 and len(self.bombs) == 0:
                     new_bullet_bomb = self.gun.fire1_end(event)
                     self.bombs.append(new_bullet_bomb)
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        motion = "LEFT"
+                    elif event.key == pygame.K_RIGHT:
+                        motion = "RIGHT"
+                    elif event.key == pygame.K_UP:
+                        motion = "UP"
+                    elif event.key == pygame.K_DOWN:
+                        motion = "DOWN"
+                elif event.type == pygame.KEYUP:
+                    if event.key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]:
+                        motion = "STOP"
+
+                if motion == "LEFT":
+                    self.gun.x -= 3
+                elif motion == "RIGHT":
+                    self.gun.x += 3
+                elif motion == "UP":
+                    self.gun.y -= 3
+                elif motion == "DOWN":
+                    self.gun.y += 3
 
             for b2 in self.bullets:  # изменяем положение и количество пуль
                 b2.draw()
