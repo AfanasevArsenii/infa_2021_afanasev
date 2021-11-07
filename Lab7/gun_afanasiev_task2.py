@@ -85,7 +85,13 @@ class Projectile:
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
-        if (self.x - obj.x)**2 + (self.y - obj.y)**2 < (self.r + obj.r)**2:
+        if ((obj.__class__.__name__ == "TargetBall")
+                and (self.x - obj.x)**2 + (self.y - obj.y)**2 < (self.r + obj.r)**2):
+            return True
+        elif ((obj.__class__.__name__ == "TargetRectangle") and (self.x >= obj.x)
+                and (self.x <= obj.x+obj.width)
+                and (self.y >= obj.y)
+                and (self.y <= obj.y + obj.height)):
             return True
         else:
             return False
@@ -215,12 +221,18 @@ class Target:
     def __init__(self):
         """ Конструктор класса Target"""
         self.screen = screen
-        self.x = randint(600, 780)
-        self.y = randint(300, 550)
-        self.r = randint(20, 50)
+        self.x = randint(100, 700)
+        self.y = randint(100, 500)
         self.vx = randint(-10, 10)
         self.vy = randint(-10, 10)
         self.color = RED
+
+
+class TargetBall(Target):
+    def __init__(self):
+        """Конструктор класса TargetBall (дочерний класс класса Target)"""
+        super().__init__()
+        self.r = randint(20, 50)
 
     def move(self):
         """Метод перемещает цель.
@@ -247,16 +259,41 @@ class Target:
 
     def draw(self):
         """Метод отрисовывает цель на экране."""
-        pygame.draw.circle(
-            self.screen,
-            self.color,
-            (self.x, self.y),
-            self.r
-        )
+        pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.r)
+
+
+class TargetRectangle(Target):
+    def __init__(self):
+        """Конструктор класса TargetRectangle (дочерний класс класса Target)"""
+        super().__init__()
+        self.width = randint(30, 100)
+        self.height = randint(30, 100)
+
+    def move(self):
+        """Метод двигает прямоуголник (меняет координаты)
+        Если прямоугольник ударился о стенку меняет скорость прямоугольника"""
+        self.x += self.vx
+        self.y += self.vy
+        if self.x < 0:
+            self.vx = randint(1, 10)
+            self.width -= 5
+        if self.x + self.width > WIDTH:
+            self.vx = randint(-10, -1)
+            self.width -= 5
+        if self.y < 0:
+            self.vy = randint(1, 10)
+            self.height -= 5
+        if self.y + self.height > HEIGHT:
+            self.vy = randint(-10, -1)
+            self.height -= 5
+
+    def draw(self):
+        """Метод отрисовывает новое положение прямоугольника"""
+        pygame.draw.rect(self.screen, self.color, (self.x, self.y, self.width, self.height))
 
 
 class Game:
-    def __init__(self, targets_quantity=5):
+    def __init__(self, rectangles_quantity=3, balls_quantity=3):
         """ Конструктор класса Gun
 
         Args:
@@ -266,44 +303,54 @@ class Game:
         self.screen = screen
         self.bullets = []
         self.bombs = []
-        self.targets = []
-        self.targets_quantity = targets_quantity
+        self.balls = []
+        self.rectangles = []
+        self.balls_quantity = balls_quantity
+        self.rectangles_quantity = rectangles_quantity
         self.gun = Gun()
 
     def collide_targets(self, target):
         """Метод изменяет движение целей в зависимости от их столкновения друг с другом."""
-        for j in range(len(self.targets)-1):
-            if (target.x-self.targets[j].x)**2+(target.y-self.targets[j].y)**2 < (target.r + self.targets[j].r)**2:
-                if target.x > self.targets[j].x:
+        for j in range(len(self.balls)-1):
+            if (target.x-self.balls[j].x)**2+(target.y-self.balls[j].y)**2 < (target.r + self.balls[j].r)**2:
+                if target.x > self.balls[j].x:
                     x = target.x
-                    target.x += (self.targets[j].x +
-                                 ((target.r + self.targets[j].r) ** 2 - (target.y - self.targets[j].y) ** 2) ** 0.5
+                    target.x += (self.balls[j].x +
+                                 ((target.r + self.balls[j].r) ** 2 - (target.y - self.balls[j].y) ** 2) ** 0.5
                                  - target.x)/2
-                    self.targets[j].x -= (self.targets[j].x - (x -
-                                         ((target.r+self.targets[j].r)**2 - (target.y-self.targets[j].y)**2)**0.5))/2
-                if target.x < self.targets[j].x:
+                    self.balls[j].x -= (self.balls[j].x - (x -
+                                         ((target.r+self.balls[j].r)**2 - (target.y-self.balls[j].y)**2)**0.5))/2
+                if target.x < self.balls[j].x:
                     x = target.x
-                    target.x -= (target.x - (self.targets[j].x -
-                                ((target.r+self.targets[j].r)**2 - (target.y-self.targets[j].y)**2) ** 0.5))/2
-                    self.targets[j].x += (x +
-                                          ((target.r+self.targets[j].r)**2 - (target.y-self.targets[j].y)**2) ** 0.5
-                                          - self.targets[j].x)/2
-                if target.y > self.targets[j].y:
+                    target.x -= (target.x - (self.balls[j].x -
+                                ((target.r+self.balls[j].r)**2 - (target.y-self.balls[j].y)**2) ** 0.5))/2
+                    self.balls[j].x += (x +
+                                          ((target.r+self.balls[j].r)**2 - (target.y-self.balls[j].y)**2) ** 0.5
+                                          - self.balls[j].x)/2
+                if target.y > self.balls[j].y:
                     y = target.y
-                    target.y += (self.targets[j].y +
-                                 ((target.r + self.targets[j].r) ** 2 - (target.x - self.targets[j].x) ** 2) ** 0.5
+                    target.y += (self.balls[j].y +
+                                 ((target.r + self.balls[j].r) ** 2 - (target.x - self.balls[j].x) ** 2) ** 0.5
                                  - target.y)/2
-                    self.targets[j].y -= (self.targets[j].y - (y -
-                                         ((target.r+self.targets[j].r)**2 - (target.x-self.targets[j].x)**2)**0.5))/2
-                if target.y < self.targets[j].y:
+                    self.balls[j].y -= (self.balls[j].y - (y -
+                                         ((target.r+self.balls[j].r)**2 - (target.x-self.balls[j].x)**2)**0.5))/2
+                if target.y < self.balls[j].y:
                     y = target.y
-                    target.y -= (target.y - (self.targets[j].y -
-                                ((target.r+self.targets[j].r)**2 - (target.x-self.targets[j].x)**2) ** 0.5))/2
-                    self.targets[j].x += (y +
-                                          ((target.r+self.targets[j].r)**2 - (target.x-self.targets[j].x)**2) ** 0.5
-                                          - self.targets[j].y)/2
-                target.vx, self.targets[j].vx = self.targets[j].vx, target.vx
-                target.vy, self.targets[j].vy = self.targets[j].vy, target.vy
+                    target.y -= (target.y - (self.balls[j].y -
+                                ((target.r+self.balls[j].r)**2 - (target.x-self.balls[j].x)**2) ** 0.5))/2
+                    self.balls[j].x += (y +
+                                          ((target.r+self.balls[j].r)**2 - (target.x-self.balls[j].x)**2) ** 0.5
+                                          - self.balls[j].y)/2
+                target.vx, self.balls[j].vx = self.balls[j].vx, target.vx
+                target.vy, self.balls[j].vy = self.balls[j].vy, target.vy
+
+    def check_len(self):
+        global points
+        for i in range(len(self.rectangles)):
+            if self.rectangles[i].width <= 0 or self.rectangles[i].height <= 0:
+                points -= 5
+                self.rectangles.pop(i)
+                self.rectangles.append(TargetRectangle())
 
     def draw_points(self):
         """Метод отрисовывает количество поражённых целей на экране."""
@@ -341,8 +388,10 @@ class Game:
     def mainloop(self):
         """Метод описывает основной цикл игры."""
         global points
-        for t in range(self.targets_quantity):
-            self.targets.append(Target())
+        for t1 in range(self.balls_quantity):
+            self.balls.append(TargetBall())
+        for t2 in range(self.rectangles_quantity):
+            self.rectangles.append(TargetRectangle())
 
         clock = pygame.time.Clock()
         finished = False
@@ -351,10 +400,14 @@ class Game:
             self.screen.fill(WHITE)
             self.gun.draw()
 
-            for t in range(len(self.targets)):
-                self.targets[t].move()
-                self.collide_targets(self.targets[t])
-                self.targets[t].draw()
+            for t1 in self.balls:
+                t1.draw()
+                self.collide_targets(t1)
+                t1.move()
+
+            for t2 in self.rectangles:
+                t2.draw()
+                t2.move()
 
             clock.tick(FPS)
             for event in pygame.event.get():
@@ -372,11 +425,16 @@ class Game:
             for b2 in self.bullets:  # изменяем положение и количество пуль
                 b2.draw()
                 b2.move()
-                for t in range(len(self.targets)):
-                    if b2.hittest(self.targets[t]):
+                for t1 in range(len(self.balls)):
+                    if b2.hittest(self.balls[t1]):
                         points += 1
-                        self.targets[t] = Target()
                         self.bullets.remove(b2)
+                        self.balls[t1] = TargetBall()
+                for t2 in range(len(self.rectangles)):
+                    if b2.hittest(self.rectangles[t2]):
+                        points += 3
+                        self.bullets.remove(b2)
+                        self.rectangles[t2] = TargetRectangle()
                 if b2.life() > 150:
                     self.bullets.remove(b2)
 
@@ -384,10 +442,17 @@ class Game:
                 for b1 in self.bombs:
                     b1.draw()
                     b1.move()
-                    for t in range(len(self.targets)):
-                        if b1.hittest(self.targets[t]):
+                    for t1 in self.balls:
+                        if b1.hittest(t1):
                             points += 1
-                            self.targets[t] = Target()
+                            t1 = TargetBall()
+                            for i in range(int(b1.r) // 5):
+                                self.bullets.append(self.gun.fire3_end(b1.x, b1.y, b1.color))
+                            self.bombs.remove(b1)
+                    for t2 in self.rectangles:
+                        if b1.hittest(t2):
+                            points += 1
+                            t2 = TargetRectangle()
                             for i in range(int(b1.r) // 5):
                                 self.bullets.append(self.gun.fire3_end(b1.x, b1.y, b1.color))
                             self.bombs.remove(b1)
@@ -395,7 +460,7 @@ class Game:
                         for i in range(int(b1.r) // 5):
                             self.bullets.append(self.gun.fire3_end(b1.x, b1.y, b1.color))
                         self.bombs.remove(b1)
-
+            self.check_len()
             self.gun.power_up()
             self.draw_points()
             pygame.display.update()
