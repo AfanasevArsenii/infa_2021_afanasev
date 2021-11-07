@@ -1,4 +1,5 @@
 import math
+import time
 from random import choice, randint
 
 import pygame
@@ -219,6 +220,23 @@ class Gun:
         else:
             self.color = GREY
 
+    def hittest(self, obj):
+        if (self.x-15 <= obj.x) and (self.x+15 >= obj.x) and (self.y-15 <= obj.y):
+            return True
+        else:
+            return False
+
+
+class BulletFromTarget(Projectile):
+    def __init__(self, x, y):
+        """Конструктор класса Bullet (дочерний класс класса Projectile)"""
+        super().__init__()
+        self.x = x
+        self.y = y
+        self.vy = 0
+        self.vx = 0
+        self.color = BLACK
+
 
 class Target:
     def __init__(self):
@@ -308,6 +326,7 @@ class Game:
         self.bombs = []
         self.balls = []
         self.rectangles = []
+        self.bombs_from_target = []
         self.balls_quantity = balls_quantity
         self.rectangles_quantity = rectangles_quantity
         self.gun = Gun(randint(100, WIDTH-100), randint(100, HEIGHT-100))
@@ -408,11 +427,25 @@ class Game:
             for t1 in self.balls:
                 t1.draw()
                 self.collide_targets(t1)
+                k = 600
+                if abs(self.gun.x - t1.x) <= 1 and self.gun.y > t1.y and k == 600:
+                    k = 0
+                    self.bombs_from_target.append(BulletFromTarget(t1.x, t1.y))
+                    k += 1
                 t1.move()
 
             for t2 in self.rectangles:
                 t2.draw()
                 t2.move()
+
+            for bt in self.bombs_from_target:
+                bt.draw()
+                bt.move()
+                if self.gun.hittest(bt):
+                    points -= 5
+                    self.bombs_from_target.remove(bt)
+                if bt.life() > 100:
+                    self.bombs_from_target.remove(bt)
 
             clock.tick(FPS)
             for event in pygame.event.get():
@@ -468,17 +501,17 @@ class Game:
                 for b1 in self.bombs:
                     b1.draw()
                     b1.move()
-                    for t1 in self.balls:
+                    for t1 in range(len(self.balls)):
                         if b1.hittest(t1):
                             points += 1
-                            t1 = TargetBall()
+                            self.balls[t1] = TargetBall()
                             for i in range(int(b1.r) // 5):
                                 self.bullets.append(self.gun.fire3_end(b1.x, b1.y, b1.color))
                             self.bombs.remove(b1)
-                    for t2 in self.rectangles:
+                    for t2 in range(len(self.rectangles)):
                         if b1.hittest(t2):
                             points += 1
-                            t2 = TargetRectangle()
+                            self.rectangles[t2] = TargetRectangle()
                             for i in range(int(b1.r) // 5):
                                 self.bullets.append(self.gun.fire3_end(b1.x, b1.y, b1.color))
                             self.bombs.remove(b1)
@@ -486,6 +519,7 @@ class Game:
                         for i in range(int(b1.r) // 5):
                             self.bullets.append(self.gun.fire3_end(b1.x, b1.y, b1.color))
                         self.bombs.remove(b1)
+
             self.check_len()
             self.gun.power_up()
             self.draw_points()
