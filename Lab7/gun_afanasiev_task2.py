@@ -563,7 +563,7 @@ class Game:
             for bt in self.bombs_from_target:  # проверяем столкновение бомбочек, появляющихся из шариков-целей с пушкой
                 bt.draw()
                 bt.move()
-                if bt.hittest(self.gun):
+                if bt.hittest(self.gun) and bt in self.bombs_from_target:
                     points -= 5
                     self.bombs_from_target.remove(bt)
                 if bt.life() > 100:
@@ -594,24 +594,23 @@ class Game:
                     new_bullet_enemy = self.gun_enemy.fire2_end_enemy(self.gun.x, self.gun.y)
                     self.bullets_enemy.append(new_bullet_enemy)
 
-
             for b2 in self.bullets:  # изменяем положение и количество пуль в зависимости от попадания по целям
                 b2.draw()
                 b2.move()
                 for t1 in range(len(self.balls)):
-                    if b2.hittest(self.balls[t1]):
+                    if b2.hittest(self.balls[t1]) and b2 in self.bullets:
                         points += 1
                         self.bullets.remove(b2)
                         self.balls[t1] = TargetBall()
                 for t2 in range(len(self.rectangles)):
-                    if b2.hittest(self.rectangles[t2]):
+                    if b2.hittest(self.rectangles[t2]) and b2 in self.bullets:
                         points += 3
                         self.bullets.remove(b2)
                         self.rectangles[t2] = TargetRectangle()
-                if b2.hittest(self.gun_enemy):
+                if b2.hittest(self.gun_enemy) and b2 in self.bullets:
                     points += 20
                     self.bullets.remove(b2)
-                if b2.life() > 150:
+                if b2.life() > 150 and b2 in self.bullets:
                     self.bullets.remove(b2)
 
             if len(self.bombs) != 0:  # если есть бомба изменяем её положение и создаём новые пули после её исчезновения
@@ -619,20 +618,20 @@ class Game:
                     b1.draw()
                     b1.move()
                     for t1 in range(len(self.balls)):
-                        if b1.hittest(t1):
+                        if b1.hittest(t1) and b1 in self.bombs:
                             points += 1
                             self.balls[t1] = TargetBall()
                             for i in range(int(b1.r) // 5):
                                 self.bullets.append(self.gun.fire3_end(b1.x, b1.y, b1.color))
                             self.bombs.remove(b1)
                     for t2 in range(len(self.rectangles)):
-                        if b1.hittest(t2):
+                        if b1.hittest(t2) and b1 in self.bombs:
                             points += 3
                             self.rectangles[t2] = TargetRectangle()
                             for i in range(int(b1.r) // 5):
                                 self.bullets.append(self.gun.fire3_end(b1.x, b1.y, b1.color))
                             self.bombs.remove(b1)
-                    if b1.life() > 100:
+                    if b1.life() > 100 and b1 in self.bombs:
                         for i in range(int(b1.r) // 5):
                             self.bullets.append(self.gun.fire3_end(b1.x, b1.y, b1.color))
                         self.bombs.remove(b1)
@@ -640,10 +639,10 @@ class Game:
             for be in self.bullets_enemy:  # изменяем положение и количество пуль в зависимости от попадания в пушку
                 be.draw()
                 be.move()
-                if be.hittest_bullet_enemy(self.gun):
+                if be.hittest_bullet_enemy(self.gun) and be in self.bullets_enemy:
                     points -= 20
                     self.bullets_enemy.remove(be)
-                if be.life() > 150:
+                if be.life() > 150  and be in self.bullets_enemy:
                     self.bullets_enemy.remove(be)
 
             self.check_len()  # проверяем, не сплющился ли до 0 прямоугольник-цель
