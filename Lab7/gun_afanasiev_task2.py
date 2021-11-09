@@ -245,7 +245,7 @@ class Gun:
         else:
             self.color = GREY
 
-    def move(self, event):
+    def check_move(self, event):
         """Метод перемещает пушку в зависимости от нажатой кнопки на клавиатуре."""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
@@ -260,6 +260,7 @@ class Gun:
             if event.key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]:
                 self.motion = "STOP"
 
+    def move(self):
         if self.motion == "LEFT":
             self.x -= 3
         elif self.motion == "RIGHT":
@@ -581,15 +582,18 @@ class Game:
                 elif event.type == pygame.MOUSEBUTTONUP and points % 5 == 0 and points != 0 and len(self.bombs) == 0:
                     new_bullet_bomb = self.gun.fire1_end(event)
                     self.bombs.append(new_bullet_bomb)
-                self.gun.move(event)
+                self.gun.check_move(event)
 
-                if self.gun_enemy.check_distance(self.gun):  # выстрел вражеской пушки
-                    if randint(0, 100) == 1:
-                        self.gun_enemy.fire_start()
-                        for i in range(randint(30, 100)):
-                            self.gun_enemy.power_up()
-                        new_bullet_enemy = self.gun_enemy.fire2_end_enemy(self.gun.x, self.gun.y)
-                        self.bullets_enemy.append(new_bullet_enemy)
+            self.gun.move()
+
+            if self.gun_enemy.check_distance(self.gun):  # выстрел вражеской пушки
+                if randint(0, 100) == 1:
+                    self.gun_enemy.fire_start()
+                    for i in range(randint(30, 100)):
+                        self.gun_enemy.power_up()
+                    new_bullet_enemy = self.gun_enemy.fire2_end_enemy(self.gun.x, self.gun.y)
+                    self.bullets_enemy.append(new_bullet_enemy)
+
 
             for b2 in self.bullets:  # изменяем положение и количество пуль в зависимости от попадания по целям
                 b2.draw()
@@ -623,7 +627,7 @@ class Game:
                             self.bombs.remove(b1)
                     for t2 in range(len(self.rectangles)):
                         if b1.hittest(t2):
-                            points += 1
+                            points += 3
                             self.rectangles[t2] = TargetRectangle()
                             for i in range(int(b1.r) // 5):
                                 self.bullets.append(self.gun.fire3_end(b1.x, b1.y, b1.color))
