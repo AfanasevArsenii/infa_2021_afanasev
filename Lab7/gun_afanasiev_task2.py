@@ -24,9 +24,8 @@ points = 0
 
 
 class Projectile:
-    def __init__(self):
+    def __init__(self, x, y):
         """ Конструктор класса Projectile снарядов.
-
         Args:
         x - начальное положение пули по горизонтали
         y - начальное положение пули по вертикали
@@ -38,10 +37,11 @@ class Projectile:
         self.color = choice(GAME_COLORS)
         self.ay = 10
         self.lifetime = 0
+        self.x = x
+        self.y = y
 
     def move(self):
         """Метод перемещает снаряд.
-
         Метод описывает перемещение снаряда за один кадр перерисовки. То есть, обновляет значения
         self.x и self.y с учетом скоростей self.vx и self.vy, силы гравитации, действующей на снаряд,
         и стен по краям окна (размер окна 800х600).
@@ -78,7 +78,6 @@ class Projectile:
 
     def hittest(self, obj):
         """Метод проверяет сталкивалкивается ли снаряд с целью, описываемой в обьекте obj.
-
         Args:
             obj: Обьект, с которым проверяется столкновение.
         Returns:
@@ -92,26 +91,50 @@ class Projectile:
                 and (self.y >= obj.y)
                 and (self.y <= obj.y + obj.height)):
             return True
+        elif (((obj.__class__.__name__ == "GunEnemy") or (obj.__class__.__name__ == "Gun"))
+                and (self.x - obj.x)**2 + (self.y - obj.y)**2 <= (self.r + obj.body_height*2**0.5)**2):
+            return True
         else:
             return False
 
 
 class Bullet(Projectile):
-    def __init__(self, gunX, gunY):
+    def __init__(self, x, y):
         """Конструктор класса Bullet (дочерний класс класса Projectile)"""
-        super().__init__()
-        self.x = gunX
-        self.y = gunY
+        super().__init__(x, y)
+
+
+class BulletEnemy(Projectile):
+    def __init__(self, x, y):
+        """ Конструктор класса BulletEnemy дочернего класса для класса Projectile).
+        Args:
+        x - начальное положение пули по горизонтали
+        y - начальное положение пули по вертикали
+        """
+        super().__init__(x, y)
+        self.color = BLUE
+
+    def hittest_bullet_enemy(self, obj):
+        """Метод проверяет сталкивалкивается ли снаряд с целью, описываемой в обьекте obj.
+        Args:
+            obj: Обьект, с которым проверяется столкновение.
+        Returns:
+            Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
+        """
+        if (self.x - obj.x)**2 + (self.y - obj.y)**2 <= (self.r + obj.body_height*2**0.5)**2:
+            return True
+        else:
+            return False
 
 
 class BulletFromBomb(Projectile):
     def __init__(self, x, y, color):
         """Конструктор класса BulletFromBomb (дочерний класс класса Projectile),
         создаёт пули(на месте бомбы с цветом бомбы со случайными скоростями),
-        которые появляются после исчезновения бомбы или в случае попадания бомбой в цель."""
-        super().__init__()
-        self.x = x
-        self.y = y
+        которые появляются после исчезновения бомбы или в случае попадания бомбой в цель.
+
+        Args:"""
+        super().__init__(x, y)
         self.r = 10
         self.vx = randint(-100, 100)
         self.vy = randint(-100, 100)
@@ -119,11 +142,9 @@ class BulletFromBomb(Projectile):
 
 
 class Bomb(Projectile):
-    def __init__(self, gunX, gunY):
+    def __init__(self, x, y):
         """Конструктор класса Bomb (дочерний класс класса Projectile)"""
-        super().__init__()
-        self.x = gunX
-        self.y = gunY
+        super().__init__(x, y)
 
     def radius_up(self):
         """Метод увеличивает радиус бомбы."""
@@ -138,22 +159,26 @@ class Bomb(Projectile):
 
 
 class Gun:
-    def __init__(self, gunX, gunY):
+    def __init__(self, gun_x, gun_y):
         """ Конструктор класса Gun
 
         Args:
-        x - начальное положение левого верхнего угла пушки по горизонтали
-        y - начальное положение левого верхнего угла пушки по вертикали
+        gun_x - начальное положение левого верхнего угла пушки по горизонтали
+        gun_y - начальное положение левого верхнего угла пушки по вертикали
         """
         self.screen = screen
         self.f_power = 10
         self.f_on = 0
         self.an = 1
         self.color = GREY
-        self.y = gunY
-        self.x = gunX
+        self.y = gun_y
+        self.x = gun_x
         self.length = 30
         self.width = 10
+        self.body_width = 30
+        self.body_height = 30
+        self.body_color = BLACK
+        self.motion = "STOP"
 
     def fire_start(self):
         """Метод активирует пушку."""
@@ -161,7 +186,6 @@ class Gun:
 
     def fire1_end(self, event):
         """Выстрел из пушки бомбой.
-
         Происходит при отпускании кнопки мыши.
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши
         и времени нажатия на правую кнопку мыши.
@@ -176,7 +200,6 @@ class Gun:
 
     def fire2_end(self, event):
         """Выстрел из пушки пулей.
-
         Происходит при отпускании кнопки мыши.
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши
         и времени нажатия на правую кнопку мыши.
@@ -200,16 +223,18 @@ class Gun:
         self.an = math.atan2((-y_mouse + self.y), (x_mouse - self.x))
         length_up = self.length + self.f_power
         width_half = self.width / 2
-        pygame.draw.rect(self.screen, BLACK, (self.x - 15, self.y - 15, 30, 30))
-        pygame.draw.polygon(self.screen, self.color,
-                          ((self.x - width_half * math.sin(self.an),
+        pygame.draw.rect(self.screen, self.body_color, (self.x - self.body_width/2, self.y - self.body_height/2,
+                                                        self.body_width, self.body_height))
+        pygame.draw.polygon(self.screen, self.color, (
+                           (self.x - width_half * math.sin(self.an),
                             self.y - width_half * math.cos(self.an)),
                            (self.x + width_half * math.sin(self.an),
                             self.y + width_half * math.cos(self.an)),
                            (self.x + width_half * math.sin(self.an) + length_up * math.cos(self.an),
                             self.y + width_half * math.cos(self.an) - length_up * math.sin(self.an)),
                            (self.x - width_half * math.sin(self.an) + length_up * math.cos(self.an),
-                            self.y - width_half * math.cos(self.an) - length_up * math.sin(self.an))))
+                            self.y - width_half * math.cos(self.an) - length_up * math.sin(self.an)))
+                            )
 
     def power_up(self):
         """Метод удлинняет пушку, увеличивает начальную скорость пули при длительном нажатии на правую кнопку мыши."""
@@ -220,17 +245,116 @@ class Gun:
         else:
             self.color = GREY
 
-    def hittest(self, obj):
-        if (self.x-15 <= obj.x) and (self.x+15 >= obj.x) and (self.y-15 <= obj.y):
+    def move(self, event):
+        """Метод перемещает пушку в зависимости от нажатой кнопки на клавиатуре."""
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                self.motion = "LEFT"
+            elif event.key == pygame.K_RIGHT:
+                self.motion = "RIGHT"
+            elif event.key == pygame.K_UP:
+                self.motion = "UP"
+            elif event.key == pygame.K_DOWN:
+                self.motion = "DOWN"
+        elif event.type == pygame.KEYUP:
+            if event.key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]:
+                self.motion = "STOP"
+
+        if self.motion == "LEFT":
+            self.x -= 3
+        elif self.motion == "RIGHT":
+            self.x += 3
+        elif self.motion == "UP":
+            self.y -= 3
+        elif self.motion == "DOWN":
+            self.y += 3
+
+        if self.x - self.body_width/2 < 0:
+            self.x = self.body_width/2
+        if self.x + self.body_height/2 > WIDTH:
+            self.x = WIDTH - self.body_width/2
+        if self.y - self.body_height/2 < 0:
+            self.y = self.body_height/2
+        if self.y + self.body_height/2 >= HEIGHT:
+            self.y = HEIGHT - self.body_height/2
+
+
+class GunEnemy(Gun):
+    def __init__(self, gun_x, gun_y):
+        """ Конструктор класса GunEnemy дочернего класса для класса Gun
+
+        Args:
+        gun_x - начальное положение левого верхнего угла пушки по горизонтали
+        gun_y - начальное положение левого верхнего угла пушки по вертикали
+        """
+        super().__init__(gun_x, gun_y)
+        self.body_color = BLUE
+        self.vy = randint(-2, 2)
+        self.vx = randint(-2, 2)
+
+    def check_distance(self, obj):
+        """Метод проверяет расстояение от вражеской пушки до пушки игрока."""
+        if (self.x - obj.x)**2 + (self.y - obj.y)**2 <= 200**2:
             return True
         else:
             return False
+
+    def draw_enemy(self, obj):
+        """Метод отрисовывает положение положение пушки на экране."""
+        x_mouse, y_mouse = obj.x, obj.y
+        if self.check_distance(obj):
+            self.an = math.atan2((-y_mouse + self.y), (x_mouse - self.x))
+            self.color = YELLOW
+        else:
+            self.an = 0
+            self.color = GREY
+        length_up = self.length + self.f_power
+        width_half = self.width / 2
+        pygame.draw.rect(self.screen, self.body_color,
+                         (self.x - self.body_width/2, self.y - self.body_height/2, self.body_width, self.body_height))
+        pygame.draw.polygon(self.screen, self.color, (
+                           (self.x - width_half * math.sin(self.an),
+                            self.y - width_half * math.cos(self.an)),
+                           (self.x + width_half * math.sin(self.an),
+                            self.y + width_half * math.cos(self.an)),
+                           (self.x + width_half * math.sin(self.an) + length_up * math.cos(self.an),
+                            self.y + width_half * math.cos(self.an) - length_up * math.sin(self.an)),
+                           (self.x - width_half * math.sin(self.an) + length_up * math.cos(self.an),
+                            self.y - width_half * math.cos(self.an) - length_up * math.sin(self.an)))
+                            )
+
+    def fire2_end_enemy(self, x, y):
+        """Выстрел из пушки пулей.
+        Происходит при отпускании кнопки мыши.
+        Начальные значения компонент скорости мяча vx и vy зависят от положения мыши
+        и времени нажатия на правую кнопку мыши.
+        """
+        new_bullet_enemy = BulletEnemy(self.x, self.y)
+        self.an = math.atan2((y - new_bullet_enemy.y), (x - new_bullet_enemy.x))
+        new_bullet_enemy.vx = self.f_power * math.cos(self.an)
+        new_bullet_enemy.vy = - self.f_power * math.sin(self.an)
+        self.f_on = 0
+        self.f_power = 10
+        return new_bullet_enemy
+
+    def move_enemy(self):
+        """Метод перемещает вражескую пушку с учётом отражениея от стен."""
+        self.x += self.vx
+        self.y += self.vy
+        if self.x - self.body_width/2 < 0:
+            self.vx = randint(1, 2)
+        if self.x + self.body_width/2 > WIDTH:
+            self.vx = randint(-2, -1)
+        if self.y - self.body_height/2 < 0:
+            self.vy = randint(1, 2)
+        if self.y + self.body_height/2 > HEIGHT:
+            self.vy = randint(-2, -1)
 
 
 class BulletFromTarget(Projectile):
     def __init__(self, x, y):
         """Конструктор класса Bullet (дочерний класс класса Projectile)"""
-        super().__init__()
+        super().__init__(x, y)
         self.x = x
         self.y = y
         self.vy = 0
@@ -257,7 +381,6 @@ class TargetBall(Target):
 
     def move(self):
         """Метод перемещает цель.
-
         Метод описывает перемещение цели за один кадр перерисовки. То есть, обновляет значения
         self.x и self.y с учетом скоростей self.vx и self.vy,
         отражения от стен по краям окна (размер окна 800х600).
@@ -316,13 +439,13 @@ class TargetRectangle(Target):
 class Game:
     def __init__(self, rectangles_quantity=3, balls_quantity=3):
         """ Конструктор класса Gun
-
         Args:
         targets_quantity - количество целей.
         points - количество поражённых целей.
         """
         self.screen = screen
         self.bullets = []
+        self.bullets_enemy = []
         self.bombs = []
         self.balls = []
         self.rectangles = []
@@ -330,6 +453,7 @@ class Game:
         self.balls_quantity = balls_quantity
         self.rectangles_quantity = rectangles_quantity
         self.gun = Gun(randint(100, WIDTH-100), randint(100, HEIGHT-100))
+        self.gun_enemy = GunEnemy(randint(100, WIDTH-100), randint(100, HEIGHT-100))
 
     def collide_targets(self, target):
         """Метод изменяет движение целей в зависимости от их столкновения друг с другом."""
@@ -340,28 +464,28 @@ class Game:
                     target.x += (self.balls[j].x +
                                  ((target.r + self.balls[j].r) ** 2 - (target.y - self.balls[j].y) ** 2) ** 0.5
                                  - target.x)/2
-                    self.balls[j].x -= (self.balls[j].x - (x -
-                                         ((target.r+self.balls[j].r)**2 - (target.y-self.balls[j].y)**2)**0.5))/2
+                    self.balls[j].x -= (self.balls[j].x - (x - (
+                                         (target.r+self.balls[j].r)**2 - (target.y-self.balls[j].y)**2)**0.5))/2
                 if target.x < self.balls[j].x:
                     x = target.x
-                    target.x -= (target.x - (self.balls[j].x -
-                                ((target.r+self.balls[j].r)**2 - (target.y-self.balls[j].y)**2) ** 0.5))/2
-                    self.balls[j].x += (x +
-                                          ((target.r+self.balls[j].r)**2 - (target.y-self.balls[j].y)**2) ** 0.5
+                    target.x -= (target.x - (self.balls[j].x - (
+                            (target.r+self.balls[j].r)**2 - (target.y-self.balls[j].y)**2) ** 0.5))/2
+                    self.balls[j].x += (x + (
+                            (target.r+self.balls[j].r)**2 - (target.y-self.balls[j].y)**2) ** 0.5
                                           - self.balls[j].x)/2
                 if target.y > self.balls[j].y:
                     y = target.y
                     target.y += (self.balls[j].y +
                                  ((target.r + self.balls[j].r) ** 2 - (target.x - self.balls[j].x) ** 2) ** 0.5
                                  - target.y)/2
-                    self.balls[j].y -= (self.balls[j].y - (y -
-                                         ((target.r+self.balls[j].r)**2 - (target.x-self.balls[j].x)**2)**0.5))/2
+                    self.balls[j].y -= (self.balls[j].y - (y - (
+                            (target.r+self.balls[j].r)**2 - (target.x-self.balls[j].x)**2)**0.5))/2
                 if target.y < self.balls[j].y:
                     y = target.y
-                    target.y -= (target.y - (self.balls[j].y -
-                                ((target.r+self.balls[j].r)**2 - (target.x-self.balls[j].x)**2) ** 0.5))/2
-                    self.balls[j].x += (y +
-                                          ((target.r+self.balls[j].r)**2 - (target.x-self.balls[j].x)**2) ** 0.5
+                    target.y -= (target.y - (self.balls[j].y - (
+                            (target.r+self.balls[j].r)**2 - (target.x-self.balls[j].x)**2) ** 0.5))/2
+                    self.balls[j].x += (y + (
+                            (target.r+self.balls[j].r)**2 - (target.x-self.balls[j].x)**2) ** 0.5
                                           - self.balls[j].y)/2
                 target.vx, self.balls[j].vx = self.balls[j].vx, target.vx
                 target.vy, self.balls[j].vy = self.balls[j].vy, target.vy
@@ -410,7 +534,7 @@ class Game:
     def mainloop(self):
         """Метод описывает основной цикл игры."""
         global points
-        for t1 in range(self.balls_quantity):
+        for t1 in range(self.balls_quantity):  # создаём заданное колиество целей 1 и 2 типа (шары и прямоугольники)
             self.balls.append(TargetBall())
         for t2 in range(self.rectangles_quantity):
             self.rectangles.append(TargetRectangle())
@@ -418,40 +542,38 @@ class Game:
         clock = pygame.time.Clock()
         finished = False
 
-        motion = "STOP"
-
         while not finished:
             self.screen.fill(WHITE)
             self.gun.draw()
+            self.gun_enemy.draw_enemy(self.gun)
+            self.gun_enemy.move_enemy()
 
-            for t1 in self.balls:
+            for t1 in self.balls:  # осуществяем столкновение шариков
                 t1.draw()
                 self.collide_targets(t1)
-                k = 600
-                if abs(self.gun.x - t1.x) <= 1 and self.gun.y > t1.y and k == 600:
-                    k = 0
+                if abs(self.gun.x - t1.x) <= 1 and self.gun.y > t1.y and randint(0, 1) == 1:
                     self.bombs_from_target.append(BulletFromTarget(t1.x, t1.y))
-                    k += 1
                 t1.move()
 
-            for t2 in self.rectangles:
+            for t2 in self.rectangles:  # отрисовываем положение прямоугольником и смещаем их
                 t2.draw()
                 t2.move()
 
-            for bt in self.bombs_from_target:
+            for bt in self.bombs_from_target:  # проверяем столкновение бомбочек, появляющихся из шариков-целей с пушкой
                 bt.draw()
                 bt.move()
-                if self.gun.hittest(bt):
+                if bt.hittest(self.gun):
                     points -= 5
                     self.bombs_from_target.remove(bt)
                 if bt.life() > 100:
                     self.bombs_from_target.remove(bt)
 
             clock.tick(FPS)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     finished = True
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN:  # производим выстрел пушкой
                     self.gun.fire_start()
                 elif event.type == pygame.MOUSEBUTTONUP and (points % 5 != 0 or points == 0 or len(self.bombs) != 0):
                     new_bullet = self.gun.fire2_end(event)
@@ -459,29 +581,17 @@ class Game:
                 elif event.type == pygame.MOUSEBUTTONUP and points % 5 == 0 and points != 0 and len(self.bombs) == 0:
                     new_bullet_bomb = self.gun.fire1_end(event)
                     self.bombs.append(new_bullet_bomb)
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_LEFT:
-                        motion = "LEFT"
-                    elif event.key == pygame.K_RIGHT:
-                        motion = "RIGHT"
-                    elif event.key == pygame.K_UP:
-                        motion = "UP"
-                    elif event.key == pygame.K_DOWN:
-                        motion = "DOWN"
-                elif event.type == pygame.KEYUP:
-                    if event.key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]:
-                        motion = "STOP"
+                self.gun.move(event)
 
-                if motion == "LEFT":
-                    self.gun.x -= 3
-                elif motion == "RIGHT":
-                    self.gun.x += 3
-                elif motion == "UP":
-                    self.gun.y -= 3
-                elif motion == "DOWN":
-                    self.gun.y += 3
+                if self.gun_enemy.check_distance(self.gun):  # выстрел вражеской пушки
+                    if randint(0, 100) == 1:
+                        self.gun_enemy.fire_start()
+                        for i in range(randint(30, 100)):
+                            self.gun_enemy.power_up()
+                        new_bullet_enemy = self.gun_enemy.fire2_end_enemy(self.gun.x, self.gun.y)
+                        self.bullets_enemy.append(new_bullet_enemy)
 
-            for b2 in self.bullets:  # изменяем положение и количество пуль
+            for b2 in self.bullets:  # изменяем положение и количество пуль в зависимости от попадания по целям
                 b2.draw()
                 b2.move()
                 for t1 in range(len(self.balls)):
@@ -494,10 +604,13 @@ class Game:
                         points += 3
                         self.bullets.remove(b2)
                         self.rectangles[t2] = TargetRectangle()
+                if b2.hittest(self.gun_enemy):
+                    points += 20
+                    self.bullets.remove(b2)
                 if b2.life() > 150:
                     self.bullets.remove(b2)
 
-            if len(self.bombs) != 0:  # есть есть бомба изменяем её положение и создаём новые пули после её исчезновения
+            if len(self.bombs) != 0:  # если есть бомба изменяем её положение и создаём новые пули после её исчезновения
                 for b1 in self.bombs:
                     b1.draw()
                     b1.move()
@@ -520,12 +633,21 @@ class Game:
                             self.bullets.append(self.gun.fire3_end(b1.x, b1.y, b1.color))
                         self.bombs.remove(b1)
 
-            self.check_len()
-            self.gun.power_up()
-            self.draw_points()
+            for be in self.bullets_enemy:  # изменяем положение и количество пуль в зависимости от попадания в пушку
+                be.draw()
+                be.move()
+                if be.hittest_bullet_enemy(self.gun):
+                    points -= 20
+                    self.bullets_enemy.remove(be)
+                if be.life() > 150:
+                    self.bullets_enemy.remove(be)
+
+            self.check_len()  # проверяем, не сплющился ли до 0 прямоугольник-цель
+            self.gun.power_up()  # перезаряжаем пушку
+            self.draw_points()  # отрисовываем счёт на экране
             pygame.display.update()
         pygame.quit()
-        self.results_table()
+        self.results_table()  # экспортируем результаты игры в таблицу
 
 
 def main():
